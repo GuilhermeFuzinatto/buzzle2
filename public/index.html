@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Buzzle Mobile</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <img src="imagens/logobuzzle.png" class="logo">
+        <div id="userMenu" class="user-menu hidden no-print">
+            <img src="imagens/cara.png" class="user-avatar" onclick="toggleMenu()">
+            <div id="dropdown" class="dropdown-content">
+                <a onclick="alert('Perfil em breve')">👤 Conta</a>
+                <a onclick="sair()" style="color:red; border-top:1px solid #eee;">🚪 Sair</a>
+            </div>
+        </div>
+    </header>
+
+    <div id="tela-login" class="container">
+        <h2 style="text-align: center;">Acesso ao Sistema</h2>
+        <div style="max-width: 400px; margin: auto; text-align: center;">
+            <input type="text" id="loginInput" placeholder="Email (Prof/Admin) ou CGM (Aluno)">
+            <input type="password" id="loginSenha" placeholder="Senha">
+            <button onclick="fazerLogin()" class="btn-green">ENTRAR</button>
+            <div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
+                <a href="#" onclick="alert('Procure a direção.')" style="color:#666; font-size:0.9rem;">Esqueci a senha</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="tela-admin" class="container hidden">
+        <h2>Direção 👔</h2>
+        <div class="flex-row no-print" style="margin:20px 0;">
+            <button onclick="navAdmin('profs')" class="secondary">Gerir Professores</button>
+            <button onclick="navAdmin('relatorios')" class="secondary">Relatórios Globais</button>
+        </div>
+        <hr>
+        <div id="admin-profs" class="hidden">
+            <h3>Novo Professor</h3>
+            <div class="flex-row">
+                <input type="text" id="admNome" placeholder="Nome">
+                <input type="email" id="admEmail" placeholder="Email">
+                <input type="text" id="admSenha" placeholder="Senha">
+                <button onclick="admCriarProf()" class="btn-blue" style="margin-top:8px;">Cadastrar</button>
+            </div>
+            <div id="lista-profs" style="margin-top:20px;"></div>
+        </div>
+        <div id="admin-relatorios" class="hidden">
+            <h3>Visualizar como Professor</h3>
+            <select id="selAdminProf" onchange="carregarRelatorioAdmin()"></select>
+            <div id="admin-area-relatorio-render" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <div id="tela-prof" class="container hidden">
+        <h2>Olá, Prof. <span id="profNome"></span></h2>
+        <div class="flex-row no-print" style="margin:20px 0;">
+            <button onclick="navProf('turmas')" class="secondary">Turmas</button>
+            <button onclick="navProf('quiz')" class="secondary">Criar Quiz</button>
+            <button onclick="navProf('relatorios')" class="secondary">Relatórios</button>
+        </div>
+
+        <div id="prof-turmas" class="hidden no-print">
+            <h3>Nova Turma</h3>
+            <div class="flex-row">
+                <select id="selAnoEscolar"><option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option><option>1º Ano EM</option></select>
+                <select id="selTurmaLetra"><option>A</option><option>B</option><option>C</option></select>
+                <select id="selAnoLetivo"></select>
+                <button onclick="criarTurmaPadrao()" class="btn-green" style="margin-top:8px;">Criar</button>
+            </div>
+            <div id="lista-turmas-prof" style="margin-top:20px;"></div>
+            <div id="gestao-alunos" class="hidden" style="background:#e3f2fd; padding:15px; border-radius:15px; margin-top:20px;">
+                <h4>Alunos de: <span id="turmaNomeSel"></span></h4>
+                <div class="flex-row">
+                    <input type="text" id="novoAlunoNome" placeholder="Nome">
+                    <input type="text" id="novoAlunoCGM" placeholder="CGM">
+                    <input type="text" id="novoAlunoSenha" placeholder="Senha">
+                    <button onclick="addAluno()" class="btn-green" style="margin-top:8px;">+</button>
+                </div>
+                <div id="lista-alunos-turma" style="margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <div id="prof-quiz" class="hidden no-print">
+            <h3>Novo Quiz</h3>
+            <input type="text" id="quizTitulo" placeholder="Título">
+            <div class="flex-row">
+                <select id="quizMaxTentativas"><option value="0">Tentativas: Infinitas</option><option value="1">1 vez</option></select>
+            </div>
+            <label>Turmas:</label><div id="checkbox-turmas" class="flex-row" style="justify-content:flex-start;"></div>
+            <div style="background:#fff; padding:15px; border:1px solid #ccc; border-radius:10px; margin-top:10px;">
+                <h4>Pergunta</h4>
+                <input type="text" id="qEnunciado" placeholder="Enunciado">
+                <div class="flex-row">
+                    <input type="text" id="qAlt0" placeholder="A"><input type="text" id="qAlt1" placeholder="B">
+                </div>
+                <div class="flex-row">
+                    <input type="text" id="qAlt2" placeholder="C"><input type="text" id="qAlt3" placeholder="D">
+                </div>
+                <select id="qCorreta"><option value="0">Correta: A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+                <button onclick="addPerguntaCache()" class="secondary">+ Adicionar</button> <span id="countPerguntas">0</span>
+            </div>
+            <button onclick="salvarQuizFinal()" class="btn-green">PUBLICAR</button>
+        </div>
+
+        <div id="prof-relatorios" class="hidden">
+            <h3 class="no-print">Relatórios</h3>
+            <div class="no-print flex-row" style="background:#FFF3E0; padding:15px; border-radius:10px;">
+                <select id="relTurmaSel" onchange="carregarQuizzesDaTurmaRelatorio()"></select>
+                <select id="relTipoSel"><option value="geral">Boletim Geral</option><option value="analise">Análise Erros</option></select>
+                <select id="relQuizSel" disabled></select>
+                <button onclick="gerarRelatorio()" class="btn-blue" style="margin-top:8px;">Gerar</button>
+            </div>
+            <div id="area-impressao" class="hidden" style="margin-top: 30px;">
+                <div style="display:flex; justify-content:space-between;"><h2 id="titulo-relatorio"></h2><button onclick="window.print()" class="btn-print no-print">🖨️</button></div>
+                <p id="subtitulo-relatorio"></p>
+                <div class="table-responsive"><table class="grade-table"><thead id="thead-relatorio"></thead><tbody id="tbody-relatorio"></tbody></table></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tela-aluno" class="container hidden">
+        <h2><span id="alunoNome"></span></h2>
+        <div class="flex-row" style="margin-top:20px;">
+            <button onclick="verQuizzesAluno()" class="secondary">Quizzes</button>
+            <button onclick="verBoletimAluno()" class="secondary">Notas</button>
+        </div>
+        <div id="area-quizzes-aluno" style="margin-top:20px;"></div>
+        <div id="area-boletim-aluno" class="hidden" style="margin-top:20px;">
+            <div class="table-responsive"><table class="grade-table"><thead><tr><th>Data</th><th>Quiz</th><th>Nota</th></tr></thead><tbody id="tabela-notas-aluno"></tbody></table></div>
+        </div>
+    </div>
+
+    <div id="tela-jogo" class="container hidden" style="text-align:center;">
+        <h2 id="jogo-pergunta"></h2>
+        <div id="jogo-opcoes" class="flex-row" style="flex-direction:column;"></div>
+    </div>
+    
+    <div id="feedback-overlay"><div id="feedback-content"><h2 id="feed-titulo"></h2><img id="feed-img" src="" style="max-width:200px; margin:10px;"><br><button onclick="proximaPergunta()">Continuar</button></div></div>
+
+    <footer class="no-print">
+        <img src="imagens/governo.png" class="footer-logo">
+        <img src="imagens/ccm.png" class="footer-logo">
+        <img src="imagens/marsela.png" class="footer-logo">
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
